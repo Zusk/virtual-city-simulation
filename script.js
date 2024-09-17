@@ -12,7 +12,8 @@ let agents = [];
 function generateAgents(num) {
     for (let i = 0; i < num; i++) {
         let name = generateName();
-        let location = assignLocation(name);
+        let preferredLocation = assignPreferredLocation(name);
+        let preferredJob = assignPreferredJob(name);
         agents.push({
             id: i,
             name: name,
@@ -20,7 +21,9 @@ function generateAgents(num) {
             duration: 0,
             partnerId: null,
             isJobOwner: true, // Default to true
-            location: location
+            location: null,
+            preferredLocation: preferredLocation,
+            preferredJob: preferredJob
         });
     }
 }
@@ -32,11 +35,18 @@ function generateName() {
     return firstName + lastName;
 }
 
-// Assign a location based on a hash of the agent's name
-function assignLocation(name) {
+// Assign a preferred location based on a hash of the agent's name
+function assignPreferredLocation(name) {
     let hash = hashString(name);
     let index = hash % locations.length;
     return locations[index];
+}
+
+// Assign a preferred job based on a hash of the agent's name
+function assignPreferredJob(name) {
+    let hash = hashString(name + 'job'); // Different hash than location
+    let index = hash % jobTypes.length;
+    return jobTypes[index];
 }
 
 // Simple hash function for strings
@@ -49,10 +59,25 @@ function hashString(str) {
     return Math.abs(hash);
 }
 
+// Weighted random selection
+function weightedRandomChoice(preferred, options, weight) {
+    let weightedOptions = [];
+    options.forEach(option => {
+        let count = option === preferred ? weight : 1;
+        for (let i = 0; i < count; i++) {
+            weightedOptions.push(option);
+        }
+    });
+    return weightedOptions[Math.floor(Math.random() * weightedOptions.length)];
+}
+
 // Assign jobs to agents
 function assignJobs() {
     agents.forEach(agent => {
         if (agent.duration <= 0) {
+            // Assign a location with weighted randomness
+            agent.location = weightedRandomChoice(agent.preferredLocation, locations, 5); // Weight of 5 for preferred location
+
             // 20% chance to initiate a shared job
             if (Math.random() < 0.2) {
                 initiateSharedJob(agent);
@@ -63,9 +88,9 @@ function assignJobs() {
     });
 }
 
-// Assign a solo job to an agent
+// Assign a solo job to an agent with weighted preference
 function assignSoloJob(agent) {
-    let jobType = jobTypes[Math.floor(Math.random() * jobTypes.length)];
+    let jobType = weightedRandomChoice(agent.preferredJob, jobTypes, 3); // Weight of 3 for preferred job
     let duration = Math.floor(Math.random() * 100) + 1; // Duration between 1 and 100 ticks
     agent.job = jobType;
     agent.duration = duration;
@@ -81,6 +106,10 @@ function initiateSharedJob(agent) {
         let partner = potentialPartners[Math.floor(Math.random() * potentialPartners.length)];
         let duration = Math.floor(Math.random() * 100) + 1;
         let jobType = 'Working with ' + partner.name;
+
+        // Bring partner to initiator's location
+        partner.location = agent.location;
+
         agent.job = jobType;
         agent.duration = duration;
         agent.partnerId = partner.id;
@@ -108,9 +137,9 @@ function tick() {
                 let partner = agents.find(a => a.id === agent.partnerId);
                 if (partner) {
                     partner.duration = agent.duration;
-                    if (partner.job !== 'Working with ' + agent.name) {
-                        partner.job = 'Working with ' + agent.name;
-                    }
+                    // Ensure partner's job and location are updated
+                    partner.job = 'Working with ' + agent.name;
+                    partner.location = agent.location;
                 }
             }
         } else if (agent.duration <= 0) {
@@ -130,7 +159,7 @@ function displayAgentList() {
     agents.forEach(agent => {
         let agentDiv = document.createElement('div');
         agentDiv.className = 'agent-item';
-        agentDiv.textContent = `${agent.name} - ${agent.job || 'Idle'} - ${agent.location} - ${agent.duration} ticks`;
+        agentDiv.textContent = `${agent.name} - ${agent.job || 'Idle'} - ${agent.duration} ticks - ${agent.location}`;
         agentDiv.addEventListener('click', () => {
             selectedAgentId = agent.id;
             displayAgentDetails(agent);
