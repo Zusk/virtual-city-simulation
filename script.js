@@ -1,6 +1,27 @@
 // List of possible first and last name parts for generating names
-const firstNameParts = ['Blip', 'Gleep', 'Zorp', 'Gloob', 'Flarp', 'Bleep', 'Wubba', 'Dingle', 'Shleem', 'Flim'];
-const lastNameParts = ['Blorp', 'Glop', 'Shmoop', 'Boop', 'Floob', 'Doop', 'Schnick', 'Florp', 'Gazorp', 'Moxie'];
+const firstNameParts = [
+    'Blip', 'Gleep', 'Zorp', 'Gloob', 'Flarp', 'Bleep', 'Wubba', 'Dingle', 'Shleem', 'Flim',
+    'Zibble', 'Krunk', 'Ploop', 'Vreep', 'Snarg', 'Mibble', 'Plink', 'Tweep', 'Griz', 'Zaddle',
+    'Thib', 'Snibble', 'Glorg', 'Tlep', 'Brong', 'Zlub', 'Plop', 'Wrangle', 'Drib', 'Skree',
+    'Chorp', 'Tizz', 'Yip', 'Glibb', 'Flonk', 'Sprag', 'Tig', 'Preep', 'Zint', 'Runk',
+    'Jorp', 'Quib', 'Vlop', 'Nerg', 'Trundle', 'Crimp', 'Whib', 'Mug', 'Vink', 'Plonk',
+    'Squib', 'Pring', 'Garg', 'Blimp', 'Vizz', 'Drong', 'Glip', 'Fribble', 'Tronk', 'Whob',
+    'Lorp', 'Yomp', 'Nerp', 'Klib', 'Gorp', 'Zump', 'Riddle', 'Throg', 'Blerg', 'Krib',
+    'Mizz', 'Skloop', 'Wimble', 'Pibble', 'Frob', 'Gribble', 'Slomp', 'Nizz', 'Clunk', 'Vrop',
+    'Tronk', 'Sprock', 'Yorb', 'Flunk', 'Snug', 'Zug', 'Dorf', 'Klep', 'Brindle', 'Clong'
+];
+
+const lastNameParts = [
+    'Blorp', 'Glop', 'Shmoop', 'Boop', 'Floob', 'Doop', 'Schnick', 'Florp', 'Gazorp', 'Moxie',
+    'Throb', 'Grunk', 'Plop', 'Zibble', 'Snork', 'Mizzle', 'Drub', 'Prang', 'Glug', 'Vrob',
+    'Twizzle', 'Snag', 'Glorp', 'Flib', 'Wub', 'Crangle', 'Zonk', 'Bizzle', 'Gribble', 'Splunk',
+    'Vreep', 'Tronk', 'Nibble', 'Frizzle', 'Bomp', 'Wrag', 'Drip', 'Snip', 'Thwop', 'Crizzle',
+    'Splick', 'Yuzz', 'Tribble', 'Snerk', 'Ploom', 'Wribble', 'Grank', 'Snarp', 'Jank', 'Miffle',
+    'Quop', 'Flick', 'Sloop', 'Brip', 'Glimp', 'Zlop', 'Thunk', 'Flizzle', 'Mub', 'Trop',
+    'Yorp', 'Vlip', 'Sprog', 'Wham', 'Chizzle', 'Grunkle', 'Tribble', 'Zlang', 'Yob', 'Snorg',
+    'Plunk', 'Tizzle', 'Groop', 'Wump', 'Friz', 'Wibble', 'Crunk', 'Glonk', 'Tharp', 'Yub',
+    'Flob', 'Mizzle', 'Chorp', 'Vlip', 'Dop', 'Zlick', 'Gluff', 'Wrizzle', 'Bop', 'Krang'
+];
 
 const jobTypes = ['Studying', 'Working', 'Eating', 'Sleeping', 'Exploring', 'Inventing', 'Calculating', 'Meditating', 'Coding', 'Analyzing'];
 
