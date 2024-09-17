@@ -31,9 +31,9 @@ function generateName() {
 function assignJobs() {
     agents.forEach(agent => {
         if (agent.duration <= 0) {
-            // 20% chance to assign a shared job
-            if (Math.random() < 0.2 && agents.length >= 2) {
-                assignSharedJob(agent);
+            // 20% chance to initiate a shared job
+            if (Math.random() < 0.2) {
+                initiateSharedJob(agent);
             } else {
                 assignSoloJob(agent);
             }
@@ -50,19 +50,19 @@ function assignSoloJob(agent) {
     agent.partnerId = null;
 }
 
-// Assign a shared job to two agents
-function assignSharedJob(agent) {
-    // Find another agent who is available
-    let availableAgents = agents.filter(a => a.id !== agent.id && a.duration <= 0);
-    if (availableAgents.length > 0) {
-        let partner = availableAgents[Math.floor(Math.random() * availableAgents.length)];
+// Initiate a shared job, potentially interrupting another agent
+function initiateSharedJob(agent) {
+    // Find another agent to share a job with (could be busy)
+    let potentialPartners = agents.filter(a => a.id !== agent.id);
+    if (potentialPartners.length > 0) {
+        let partner = potentialPartners[Math.floor(Math.random() * potentialPartners.length)];
         let duration = Math.floor(Math.random() * 100) + 1;
         let jobType = 'Working with ' + partner.name;
         agent.job = jobType;
         agent.duration = duration;
         agent.partnerId = partner.id;
 
-        // Assign the same job and duration to the partner
+        // Update partner's job to reflect the shared job
         partner.job = 'Working with ' + agent.name;
         partner.duration = duration;
         partner.partnerId = agent.id;
@@ -74,20 +74,28 @@ function assignSharedJob(agent) {
 
 // Update agent durations each tick
 function tick() {
-    let selectedAgent = getSelectedAgent();
     agents.forEach(agent => {
         if (agent.duration > 0) {
             agent.duration--;
+
+            // If working with a partner, ensure durations stay synchronized
+            if (agent.partnerId !== null) {
+                let partner = agents.find(a => a.id === agent.partnerId);
+                if (partner) {
+                    partner.duration = agent.duration;
+                    if (partner.job !== 'Working with ' + agent.name) {
+                        // Update partner's job in case it was changed
+                        partner.job = 'Working with ' + agent.name;
+                    }
+                }
+            }
         } else {
+            // Assign new job if duration is 0
             assignJobs();
         }
     });
     displayAgentList();
-    if (selectedAgent) {
-        // Update agent details if an agent is selected
-        let updatedAgent = agents.find(agent => agent.id === selectedAgent.id);
-        displayAgentDetails(updatedAgent);
-    }
+    updateAgentDetails();
 }
 
 // Display agent list
@@ -99,7 +107,10 @@ function displayAgentList() {
         let agentDiv = document.createElement('div');
         agentDiv.className = 'agent-item';
         agentDiv.textContent = `${agent.name} - ${agent.job || 'Idle'} - ${agent.duration} ticks`;
-        agentDiv.addEventListener('click', () => displayAgentDetails(agent));
+        agentDiv.addEventListener('click', () => {
+            selectedAgentId = agent.id;
+            displayAgentDetails(agent);
+        });
         agentListDiv.appendChild(agentDiv);
     });
 }
@@ -115,15 +126,18 @@ function displayAgentDetails(agent) {
     `;
 }
 
+// Update agent details if an agent is selected
+function updateAgentDetails() {
+    if (selectedAgentId !== null) {
+        let agent = agents.find(a => a.id === selectedAgentId);
+        if (agent) {
+            displayAgentDetails(agent);
+        }
+    }
+}
+
 // Get the currently selected agent (if any)
 let selectedAgentId = null;
-
-function getSelectedAgent() {
-    if (selectedAgentId !== null) {
-        return agents.find(agent => agent.id === selectedAgentId);
-    }
-    return null;
-}
 
 // Initialize simulation
 function init() {
@@ -136,15 +150,3 @@ function init() {
 }
 
 window.onload = init;
-
-// Event listener to track selected agent
-function displayAgentDetails(agent) {
-    selectedAgentId = agent.id;
-    const agentDetailsDiv = document.getElementById('agent-details');
-    agentDetailsDiv.innerHTML = `
-        <h2>Agent Details</h2>
-        <p><strong>Name:</strong> ${agent.name}</p>
-        <p><strong>Job:</strong> ${agent.job || 'Idle'}</p>
-        <p><strong>Remaining Duration:</strong> ${agent.duration} ticks</p>
-    `;
-}
