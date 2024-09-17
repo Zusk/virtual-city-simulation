@@ -22,12 +22,12 @@ h1, h2 {
     margin-bottom: 20px;
 }
 
-.agent-list div {
+.agent-item {
     cursor: pointer;
     padding: 5px;
 }
 
-.agent-list div:hover {
+.agent-item:hover {
     background-color: #033;
 }
 
@@ -35,4 +35,3 @@ h1, h2 {
     border: 1px solid #0f0;
     padding: 10px;
 }
-
