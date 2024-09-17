@@ -10,12 +10,12 @@ let agents = [];
 function generateAgents(num) {
     for (let i = 0; i < num; i++) {
         let name = generateName();
-        let job = assignJob();
         agents.push({
             id: i,
             name: name,
-            job: job.type,
-            duration: job.duration
+            job: null,
+            duration: 0,
+            partnerId: null
         });
     }
 }
@@ -27,25 +27,67 @@ function generateName() {
     return firstName + lastName;
 }
 
-// Assign a random job with random duration
-function assignJob() {
+// Assign jobs to agents
+function assignJobs() {
+    agents.forEach(agent => {
+        if (agent.duration <= 0) {
+            // 20% chance to assign a shared job
+            if (Math.random() < 0.2 && agents.length >= 2) {
+                assignSharedJob(agent);
+            } else {
+                assignSoloJob(agent);
+            }
+        }
+    });
+}
+
+// Assign a solo job to an agent
+function assignSoloJob(agent) {
     let jobType = jobTypes[Math.floor(Math.random() * jobTypes.length)];
     let duration = Math.floor(Math.random() * 100) + 1; // Duration between 1 and 100 ticks
-    return { type: jobType, duration: duration };
+    agent.job = jobType;
+    agent.duration = duration;
+    agent.partnerId = null;
+}
+
+// Assign a shared job to two agents
+function assignSharedJob(agent) {
+    // Find another agent who is available
+    let availableAgents = agents.filter(a => a.id !== agent.id && a.duration <= 0);
+    if (availableAgents.length > 0) {
+        let partner = availableAgents[Math.floor(Math.random() * availableAgents.length)];
+        let duration = Math.floor(Math.random() * 100) + 1;
+        let jobType = 'Working with ' + partner.name;
+        agent.job = jobType;
+        agent.duration = duration;
+        agent.partnerId = partner.id;
+
+        // Assign the same job and duration to the partner
+        partner.job = 'Working with ' + agent.name;
+        partner.duration = duration;
+        partner.partnerId = agent.id;
+    } else {
+        // If no partner is available, assign a solo job
+        assignSoloJob(agent);
+    }
 }
 
 // Update agent durations each tick
 function tick() {
+    let selectedAgent = getSelectedAgent();
     agents.forEach(agent => {
         if (agent.duration > 0) {
             agent.duration--;
         } else {
-            // Assign new job if duration is 0
-            let newJob = assignJob();
-            agent.job = newJob.type;
-            agent.duration = newJob.duration;
+            assignJobs();
         }
     });
+    displayAgentList();
+    if (selectedAgent) {
+        // Update agent details if an agent is selected
+        let updatedAgent = agents.find(agent => agent.id === selectedAgent.id);
+        displayAgentDetails(updatedAgent);
+    }
 }
 
 // Display agent list
@@ -55,7 +97,8 @@ function displayAgentList() {
 
     agents.forEach(agent => {
         let agentDiv = document.createElement('div');
-        agentDiv.textContent = agent.name;
+        agentDiv.className = 'agent-item';
+        agentDiv.textContent = `${agent.name} - ${agent.job || 'Idle'} - ${agent.duration} ticks`;
         agentDiv.addEventListener('click', () => displayAgentDetails(agent));
         agentListDiv.appendChild(agentDiv);
     });
@@ -67,14 +110,25 @@ function displayAgentDetails(agent) {
     agentDetailsDiv.innerHTML = `
         <h2>Agent Details</h2>
         <p><strong>Name:</strong> ${agent.name}</p>
-        <p><strong>Job:</strong> ${agent.job}</p>
+        <p><strong>Job:</strong> ${agent.job || 'Idle'}</p>
         <p><strong>Remaining Duration:</strong> ${agent.duration} ticks</p>
     `;
+}
+
+// Get the currently selected agent (if any)
+let selectedAgentId = null;
+
+function getSelectedAgent() {
+    if (selectedAgentId !== null) {
+        return agents.find(agent => agent.id === selectedAgentId);
+    }
+    return null;
 }
 
 // Initialize simulation
 function init() {
     generateAgents(50); // Generate 50 agents
+    assignJobs();
     displayAgentList();
     setInterval(() => {
         tick();
@@ -83,3 +137,14 @@ function init() {
 
 window.onload = init;
 
+// Event listener to track selected agent
+function displayAgentDetails(agent) {
+    selectedAgentId = agent.id;
+    const agentDetailsDiv = document.getElementById('agent-details');
+    agentDetailsDiv.innerHTML = `
+        <h2>Agent Details</h2>
+        <p><strong>Name:</strong> ${agent.name}</p>
+        <p><strong>Job:</strong> ${agent.job || 'Idle'}</p>
+        <p><strong>Remaining Duration:</strong> ${agent.duration} ticks</p>
+    `;
+}
